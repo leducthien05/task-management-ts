@@ -78,7 +78,8 @@ export const changeMulti = async (req: Request, res: Response) => {
     console.log(req.body);
     enum statusTask {
         status = "status",
-        position = "position"
+        position = "position",
+        deleted = "deleted"
     }
 
     switch (key) {
@@ -94,6 +95,13 @@ export const changeMulti = async (req: Request, res: Response) => {
                 _id: { $in: ids }
             }, {
                 status: value
+            });
+            break;
+        case statusTask.deleted:
+            await Task.updateMany({
+                _id: { $in: ids }
+            }, {
+                deleted: value
             });
             break;
         default:
@@ -136,5 +144,51 @@ export const edit = async (req: Request, res: Response) => {
     res.json({
         code: 200,
         message: "Cập nhật thành công"
+    });
+}
+
+export const deleted = async (req: Request, res: Response) => {
+    const id: string = req.params.id.toString();
+    try {
+        await Task.updateOne({
+            _id: id
+        }, {
+            $set: {
+                deleted: true,
+                deletedAt: new Date()
+            }
+        });
+    } catch (error) {
+        res.json({
+            code: 100,
+            message: "Xóa thất bại"
+        });
+    }
+    res.json({
+        code: 200,
+        message: "Xóa thành công"
+    });
+}
+
+export const deletedMulti = async (req: Request, res: Response) => {
+    const ids: string[] = req.body.ids;
+    try {
+        await Task.updateMany({
+            _id: { $in: ids }
+        }, {
+            $set: {
+                deleted: true,
+                deletedAt: new Date()
+            }
+        });
+    } catch (error) {
+        res.json({
+            code: 100,
+            message: "Xóa thất bại"
+        });
+    }
+    res.json({
+        code: 200,
+        message: "Xóa thành công"
     });
 }
