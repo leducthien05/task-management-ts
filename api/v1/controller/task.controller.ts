@@ -71,36 +71,52 @@ export const changeStatus = async (req: Request, res: Response) => {
     });
 }
 
-export const changeMulti = async (req: Request, res: Response) =>{
+export const changeMulti = async (req: Request, res: Response) => {
     const ids: string[] = req.body.ids;
     const key: string = req.body.key;
     const value: string = req.body.value;
     console.log(req.body);
     enum statusTask {
-        status= "status",
-        position= "position"
+        status = "status",
+        position = "position"
     }
 
-    switch(key){
-        case statusTask.status: 
+    switch (key) {
+        case statusTask.status:
             await Task.updateMany({
-                _id: {$in: ids}
+                _id: { $in: ids }
             }, {
                 status: value
             });
             break;
-        case statusTask.position: 
+        case statusTask.position:
             await Task.updateMany({
-                _id: {$in: ids}
+                _id: { $in: ids }
             }, {
                 status: value
             });
             break;
-        default: 
+        default:
             break;
     }
     res.json({
         code: 200,
         message: "Cập nhật thành công"
+    });
+}
+
+export const create = async (req: Request, res: Response) => {
+    try {
+        const task = new Task(req.body);
+        await task.save();
+    } catch (error) {
+        res.json({
+            code: 100,
+            message: "Thêm mới thất bại"
+        });
+    }
+    res.json({
+        code: 200,
+        message: "Thêm mới thành công"
     });
 }
