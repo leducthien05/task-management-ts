@@ -120,3 +120,21 @@ export const create = async (req: Request, res: Response) => {
         message: "Thêm mới thành công"
     });
 }
+
+export const edit = async (req: Request, res: Response) => {
+    const id: string = req.params.id.toString();
+    try {
+        await Task.updateOne({
+            _id: id
+        }, req.body);
+    } catch (error) {
+        res.json({
+            code: 100,
+            message: "Cập nhật thất bại"
+        });
+    }
+    res.json({
+        code: 200,
+        message: "Cập nhật thành công"
+    });
+}
