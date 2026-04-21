@@ -4,7 +4,7 @@ import Task from "../model/task.model";
 import pagination from "../../../helper/pagination";
 import searchHelper from "../../../helper/search";
 
-export const index = async (req: Request, res: Response)=>{    
+export const index = async (req: Request, res: Response) => {
     //Find
     interface Find {
         deleted: boolean,
@@ -14,13 +14,13 @@ export const index = async (req: Request, res: Response)=>{
     const find: Find = {
         deleted: false
     }
-    if(req.query.status){
-        find.status= req.query.status.toString();
+    if (req.query.status) {
+        find.status = req.query.status.toString();
     }
     // End Find
     // Tìm kiếm
     const search = searchHelper(req.query);
-    if(req.query.keyword){
+    if (req.query.keyword) {
         find.title = search.regex;
     }
     // Phân trang
@@ -30,20 +30,77 @@ export const index = async (req: Request, res: Response)=>{
 
     // Sort
     const sort: Record<string, any> = {};
-    if(req.query.sortKey && req.query.sortValue){
+    if (req.query.sortKey && req.query.sortValue) {
         const sortKey = req.query.sortKey.toString();
         sort[sortKey] = req.query.sortValue.toString();
     }
     // End Sort
     const task = await Task.find(find).sort(sort).skip(paginationPage.skipRecord).limit(paginationPage.limit);
-    
+
     res.json(task);
 }
 
-export const detail = async (req: Request, res: Response)=>{
+export const detail = async (req: Request, res: Response) => {
     const task = await Task.findOne({
         deleted: false,
         _id: req.params.id
     });
     res.json(task);
+}
+
+export const changeStatus = async (req: Request, res: Response) => {
+    const id: string = req.params.id.toString();
+    const status: string = req.body.status;
+    try {
+        await Task.updateOne({
+            _id: id
+        }, {
+            $set: {
+                status: status
+            }
+        });
+    } catch (error) {
+        res.json({
+            code: 100,
+            message: "Cập nhật không thành công"
+        });
+    }
+    res.json({
+        code: 200,
+        message: "Cập nhật thành công"
+    });
+}
+
+export const changeMulti = async (req: Request, res: Response) =>{
+    const ids: string[] = req.body.ids;
+    const key: string = req.body.key;
+    const value: string = req.body.value;
+    console.log(req.body);
+    enum statusTask {
+        status= "status",
+        position= "position"
+    }
+
+    switch(key){
+        case statusTask.status: 
+            await Task.updateMany({
+                _id: {$in: ids}
+            }, {
+                status: value
+            });
+            break;
+        case statusTask.position: 
+            await Task.updateMany({
+                _id: {$in: ids}
+            }, {
+                status: value
+            });
+            break;
+        default: 
+            break;
+    }
+    res.json({
+        code: 200,
+        message: "Cập nhật thành công"
+    });
 }
