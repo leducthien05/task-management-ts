@@ -2,12 +2,14 @@ import { Request, Response } from "express";
 import Task from "../model/task.model";
 
 import pagination from "../../../helper/pagination";
+import searchHelper from "../../../helper/search";
 
 export const index = async (req: Request, res: Response)=>{    
     //Find
     interface Find {
         deleted: boolean,
-        status?: string
+        status?: string,
+        title?: RegExp
     }
     const find: Find = {
         deleted: false
@@ -16,11 +18,14 @@ export const index = async (req: Request, res: Response)=>{
         find.status= req.query.status.toString();
     }
     // End Find
-
+    // Tìm kiếm
+    const search = searchHelper(req.query);
+    if(req.query.keyword){
+        find.title = search.regex;
+    }
     // Phân trang
     const countDocument = await Task.countDocuments(find);
     const paginationPage = pagination(req.query, countDocument);
-    console.log(paginationPage)
     // End Phân trang
 
     // Sort
