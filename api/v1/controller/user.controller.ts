@@ -72,9 +72,11 @@ export const info = async (req: Request, res: Response)=>{
         });
         return;
     }
+    const reqAny = req as any;
+    reqAny.user = user;
     res.json({
         code: 200,
         message: "Thông tin người dùng",
-        user: user
+        user: reqAny.user
     });
 }
